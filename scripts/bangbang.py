@@ -35,8 +35,9 @@ class BangBang(object):
         self.cmd(-2, 0)
         self.rate.sleep()
         self.rate.sleep()
-        self.cmd(0, 0)
-        
+        self.cmd(0,0) #important since safety function in bicycle converter as each command should only last 1/10 of a second.
+        # Remember to set to 0,0 when you don't want to move.
+
 
     def turn(self, mag, d):
         self.cmd(mag, d*mag)
@@ -47,17 +48,21 @@ class BangBang(object):
         self.rate.sleep()
         self.cmd(mag, -d*mag)
         self.rate.sleep()
-        self.cmd(0, 0)
+        self.cmd(0,0) #important since safety function in bicycle converter as each command should only last 1/10 of a second
 
     def cmd(self, u1, u2):
         self.pub.publish(BicycleCommandMsg(u1, u2))
 
 if __name__ == '__main__':
     rospy.init_node('bangbang', anonymous=False)
-    
+
     b = BangBang()
     b.run()
+    #while (the distance is quite large)
+        # update d and magnitude according to the position error of turtle
+        # execute the strafe movement
+        # update distance between current and desired after the strafe
 
 
-
-
+        #rosservice list
+            #/converter/reset

@@ -13,6 +13,7 @@ from lab3_pkg.msg import BicycleCommandMsg, BicycleStateMsg
 import tf2_ros
 import tf
 
+# This is what we should edit
 class SinusoidPlanner():
     def __init__(self, l, max_phi, max_u1, max_u2):
         """
@@ -28,12 +29,13 @@ class SinusoidPlanner():
         self.max_u1 = max_u1
         self.max_u2 = max_u2
 
+    # We made deside to make 4 plans instead of 1 plan. This would be good as we will get drift in phi. And this way we can deal with the drift.
     def plan_to_pose(self, start_state, goal_state, dt = 0.01, delta_t=2):
         """
-        Plans to a specific pose in (x,y,theta,phi) coordinates.  You 
+        Plans to a specific pose in (x,y,theta,phi) coordinates.  You
         may or may not have to convert the state to a v state with state2v()
         This is a very optional function.  You may want to plan each component separately
-        so that you can reset phi in case there's drift in phi 
+        so that you can reset phi in case there's drift in phi
 
         Parameters
         ----------
@@ -66,39 +68,40 @@ class SinusoidPlanner():
         )
 
         x_path =        self.steer_x(
-                            start_state, 
-                            goal_state, 
-                            0, 
-                            dt, 
+                            start_state,
+                            goal_state,
+                            0,
+                            dt,
                             delta_t
                         )
         phi_path =      self.steer_phi(
-                            x_path[-1][2], 
-                            goal_state, 
-                            x_path[-1][0] + dt, 
-                            dt, 
+                            x_path[-1][2],
+                            goal_state,
+                            x_path[-1][0] + dt,
+                            dt,
                             delta_t
                         )
         alpha_path =    self.steer_alpha(
-                            phi_path[-1][2], 
-                            goal_state, 
-                            phi_path[-1][0] + dt, 
-                            dt, 
+                            phi_path[-1][2],
+                            goal_state,
+                            phi_path[-1][0] + dt,
+                            dt,
                             delta_t
                         )
         y_path =        self.steer_y(
-                            alpha_path[-1][2], 
-                            goal_state, 
-                            alpha_path[-1][0] + dt, 
-                            dt, 
+                            alpha_path[-1][2],
+                            goal_state,
+                            alpha_path[-1][0] + dt,
+                            dt,
                             delta_t
-                        )     
+                        )
 
         path = []
         for p in [x_path, phi_path, alpha_path, y_path]:
             path.extend(p)
         return path
 
+    # if we want to stitch paths together we can use t0.
     def steer_x(self, start_state, goal_state, t0 = 0, dt = 0.01, delta_t = 2):
         """
         Create a trajectory to move the turtlebot in the x direction
@@ -157,13 +160,21 @@ class SinusoidPlanner():
         :obj:`list` of (float, BicycleCommandMsg, BicycleStateMsg)
             This is a list of timesteps, the command to be sent at that time, and the predicted state at that time
         """
+        # v1 = 0
+        # v2 = delta_phi/delta_t
+        #
+        # path, t = [], t0
+        # while t < t0 + delta_t:
+        #     path.append([t, v1, v2])
+        #     t = t + dt
+        # return self.v_path_to_u_path(path, start_state, dt)
 
         # ************* IMPLEMENT THIS
         return []
 
     def steer_alpha(self, start_state, goal_state, t0 = 0, dt = 0.01, delta_t = 2):
         """
-        Create a trajectory to move the turtlebot in the alpha direction.  
+        Create a trajectory to move the turtlebot in the alpha direction.
         Remember dot{alpha} = f(phi(t))*u_1(t) = f(frac{a_2}{omega}*sin(omega*t))*a_1*sin(omega*t)
         also, f(phi) = frac{1}{l}tan(phi)
         See the doc for more math details
@@ -201,7 +212,7 @@ class SinusoidPlanner():
 
         a1 = (delta_alpha*omega)/(np.pi*beta1)
 
-              
+
         v1 = lambda t: a1*np.sin(omega*(t))
         v2 = lambda t: a2*np.cos(omega*(t))
 
@@ -214,7 +225,7 @@ class SinusoidPlanner():
 
     def steer_y(self, start_state, goal_state, t0 = 0, dt = 0.01, delta_t = 2):
         """
-        Create a trajectory to move the turtlebot in the y direction. 
+        Create a trajectory to move the turtlebot in the y direction.
         Remember, dot{y} = g(alpha(t))*v1 = frac{alpha(t)}{sqrt{1-alpha(t)^2}}*a_1*sin(omega*t)
         See the doc for more math details
 
@@ -236,7 +247,7 @@ class SinusoidPlanner():
         :obj:`list` of (float, BicycleCommandMsg, BicycleStateMsg)
             This is a list of timesteps, the command to be sent at that time, and the predicted state at that time
         """
-        
+
         # ************* IMPLEMENT THIS
         return []
 
@@ -251,7 +262,7 @@ class SinusoidPlanner():
 
         Returns
         -------
-        4x1 :obj:`numpy.ndarray` 
+        4x1 :obj:`numpy.ndarray`
             x, phi, alpha, y
         """
         return np.array([state.x, state.phi, np.sin(state.theta), state.y])

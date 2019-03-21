@@ -33,7 +33,8 @@ class Sinusoid():
                 break
             u1 = a1*np.sin(w1*t)
             u2 = a2*np.cos(w2*t)
-            self.cmd_v(u1, u2)
+            self.cmd_v(u1, u2) # we have a singularity
+            #self.cmd(u1, u2) # loose property of zero drift in y
             self.rate.sleep()
         self.cmd(0,0)
 
@@ -58,10 +59,12 @@ class Sinusoid():
 
 if __name__ == '__main__':
     rospy.init_node('sinusoid', anonymous=False)
-    
+
     s = Sinusoid()
     s.run(float(sys.argv[1]), float(sys.argv[2]), float(sys.argv[3]), float(sys.argv[4]))
 
+    #python sinusoid.py 1 .1 1 2
+    #parallel parking movement.
 
-
-
+    #python sinusoid.py 1 1 1 2
+    #This is reveal a singularity and simulation ****s up.

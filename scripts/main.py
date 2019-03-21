@@ -16,6 +16,9 @@ from lab3_pkg.msg import BicycleCommandMsg, BicycleStateMsg
 from lab3.planners import SinusoidPlanner
 
 class Exectutor(object):
+
+        # We should make our implementations in here...
+
     def __init__(self):
         """
         Executes a plan made by the planner
@@ -57,7 +60,7 @@ class Exectutor(object):
     def subscribe(self, msg):
         """
         callback fn for state listener.  Don't call me...
-        
+
         Parameters
         ----------
         msg : :obj:`BicycleStateMsg`
@@ -89,7 +92,7 @@ if __name__ == '__main__':
     print 'found!'
     reset = rospy.ServiceProxy('/converter/reset', EmptySrv)
     reset()
-    
+
     ex = Exectutor()
 
     print "Initial State"
@@ -98,7 +101,7 @@ if __name__ == '__main__':
     p = SinusoidPlanner(0.3, 0.3, 2, 3)
     goalState = BicycleStateMsg(args.x, args.y, args.theta, args.phi)
     plan = p.plan_to_pose(ex.state, goalState, 0.01, 2)
-    
+
     print "Predicted Initial State"
     print plan[0][2]
     print "Predicted Final State"
@@ -108,4 +111,10 @@ if __name__ == '__main__':
     print "Final State"
     print ex.state
 
+    
+    #reset turtle in terminal
+    #rosservice call /converter/reset
 
+
+    #we should make our own plotting code
+    # They want us to share plotting code
