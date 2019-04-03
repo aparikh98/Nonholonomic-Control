@@ -170,7 +170,18 @@ class SinusoidPlanner():
         # return self.v_path_to_u_path(path, start_state, dt)
 
         # ************* IMPLEMENT THIS
-        return []
+        # return []
+
+        v1 = 0
+        v2 = delta_phi/delta_t
+        # we can have phi only changed with v1 = 0 and v2 = delta_phi/delta_t (linear function)  
+        
+        path, t = [], t0
+        while t < t0 + delta_t:
+            path.append([t, v1, v2])
+            t = t + dt
+        return self.v_path_to_u_path(path, start_state, dt)
+        
 
     def steer_alpha(self, start_state, goal_state, t0 = 0, dt = 0.01, delta_t = 2):
         """
