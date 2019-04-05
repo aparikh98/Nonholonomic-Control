@@ -19,6 +19,8 @@ class BangBang(object):
         self.pose_subscriber = rospy.Subscriber('/bicycle/state', BicycleStateMsg, self.update_pose)
         self.rate = rospy.Rate(1)
         self.state = np.array([0,0,0,0])
+        self.state_record = []
+        self.goal = np.array([0,0,0,0])
 
     def update_pose(self, data):
         self.state = np.array([data.x, data.y, data.theta, data.phi])
@@ -34,6 +36,7 @@ class BangBang(object):
 
     def translate_x(self, dist):
         goal = np.array([dist,0,0,0])
+        self.goal = goal
         distance = goal - self.state
         while (distance[0] > 0.01):
             self.cmd(distance[0], distance[3])
@@ -48,6 +51,7 @@ class BangBang(object):
 
     def translate_theta(self, angle):
         goal = np.array([0,0,angle,0])
+        self.goal = goal
         distance = goal - self.state
         print(distance)
         while ((distance[2]) > 0.1):
@@ -68,6 +72,7 @@ class BangBang(object):
 
     def rotate_theta2(self, angle):
         goal = np.array([0,0,angle,0])
+        self.goal = goal
         distance = goal - self.state
         #sign = distance > 0 ? -1 : 1
         while (abs(distance[2]) > 0.05):
@@ -91,11 +96,12 @@ class BangBang(object):
 
     def translate_y(self, dist):
         goal = np.array([0,dist,0,0])
+        self.goal = goal
         distance = goal - self.state
         self.cmd(1, 1)
         self.rate.sleep()
         while (distance[1] > 0.1):
-            
+
             self.cmd(0.5, -1)
             self.rate.sleep()
             self.cmd(-0.5, 1)
@@ -116,7 +122,7 @@ class BangBang(object):
         self.rate.sleep()
 
     def translate_y_and_x(self):
-        
+        self.goal = np.array([0.5,0.5,0, 0])
         self.translate_x(1)
         print('first x')
         self.rotate_theta2(np.pi)
@@ -163,7 +169,29 @@ class BangBang(object):
         self.cmd(0,0) #important since safety function in bicycle converter as each command should only last 1/10 of a second
 
     def cmd(self, u1, u2):
+        self.state_record.append(self.state)
         self.pub.publish(BicycleCommandMsg(u1, u2))
+
+    def plot(self):
+        #this plotting is pretty bad since it assumes time steps are equal, but ehh
+        
+        f, axarr = plt.subplots(4, sharex=True)
+        time = [i for i in range len(self.state_record)]
+        for idx in range(4):
+            des = [((double) self.goal[idx] )/len(self.state_record) * i  for i in range len(self.state_record)]
+            real = [self.state_record[i][idx] for i in range len(self.state_record)]
+            axarr[idx].scatter(time, des)
+            axarr[idx].scatter(time, real)
+        plt.show()
+
+        f, ax = plt.subplots()
+        x_des = [((double) self.goal[0] )/len(self.state_record) * i  for i in range len(self.state_record)]
+        y_des = [((double) self.goal[1] )/len(self.state_record) * i  for i in range len(self.state_record)]
+        x_real = [self.state_record[i][0] for i in range len(self.state_record)]
+        y_real = [self.state_record[i][1] for i in range len(self.state_record)]
+        ax.plot(x_des, y_des,  color='r')
+        ax.plot(x_real, y_real,  color='b')
+        plt.show()
 
 if __name__ == '__main__':
     rospy.init_node('bangbang', anonymous=False)

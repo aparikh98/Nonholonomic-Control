@@ -11,6 +11,8 @@ import tf2_ros
 import tf
 from std_srvs.srv import Empty as EmptySrv
 import rospy
+import matplotlib.pyplot as plt
+
 from lab3_pkg.msg import BicycleCommandMsg, BicycleStateMsg
 
 from lab3.planners import SinusoidPlanner
@@ -28,6 +30,7 @@ class Exectutor(object):
         self.rate = rospy.Rate(100)
         self.state = BicycleStateMsg()
         rospy.on_shutdown(self.shutdown)
+        self.state_record = []
 
     def execute(self, plan):
         """
@@ -43,6 +46,7 @@ class Exectutor(object):
         for (t, cmd, state) in plan:
             self.cmd(cmd)
             self.rate.sleep()
+            self.state_record.append((state,self.state))
             if rospy.is_shutdown():
                 break
         self.cmd(BicycleCommandMsg())
@@ -70,6 +74,28 @@ class Exectutor(object):
     def shutdown(self):
         rospy.loginfo("Shutting Down")
         self.cmd(BicycleCommandMsg())
+
+    def plot(self):
+        f, axarr = plt.subplots(4, sharex=True)
+        time = [i for i in range len(self.state_record)]
+        for idx in range(4):
+            des = [self.state_record[i][0][idx] for i in range len(self.state_record)]
+            real = [self.state_record[i][1][idx] for i in range len(self.state_record)]
+            axarr[idx].scatter(time, des)
+            axarr[idx].scatter(time, real)
+        plt.show()
+
+        f, ax = plt.subplots()
+        x_des = [self.state_record[i][0][0] for i in range len(self.state_record)]
+        y_des = [self.state_record[i][0][1] for i in range len(self.state_record)]
+        x_real = [self.state_record[i][1][0] for i in range len(self.state_record)]
+        y_real = [self.state_record[i][1][1] for i in range len(self.state_record)]
+        ax.plot(x_des, y_des,  color='r')
+        ax.plot(x_real, y_real,  color='b')
+        plt.show()
+
+
+
 
 def parse_args():
     """
@@ -110,10 +136,10 @@ if __name__ == '__main__':
     ex.execute(plan)
     print "Final State"
     print ex.state
+    ex.plot()
 
-    
     #reset turtle in terminal
-    
+
     #rosservice call /converter/reset
 
 
