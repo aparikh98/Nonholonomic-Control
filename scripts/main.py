@@ -77,22 +77,33 @@ class Exectutor(object):
 
     def plot(self):
         f, axarr = plt.subplots(4, sharex=True)
-        time = [i for i in range len(self.state_record)]
-        for idx in range(4):
-            des = [self.state_record[i][0][idx] for i in range len(self.state_record)]
-            real = [self.state_record[i][1][idx] for i in range len(self.state_record)]
-            axarr[idx].scatter(time, des)
-            axarr[idx].scatter(time, real)
+        time = [i for i in range(len(self.state_record))]
+        des = [self.state_record[i][0].x for i in range(len(self.state_record))]
+        real = [self.state_record[i][1].x for i in range(len(self.state_record))]
+        axarr[0].plot(time, des, color = 'r')
+        axarr[0].plot(time, real, color = 'g')
+        des = [self.state_record[i][0].y for i in range(len(self.state_record))]
+        real = [self.state_record[i][1].y for i in range(len(self.state_record))]
+        axarr[1].plot(time, des, color = 'r')
+        axarr[1].plot(time, real, color = 'g')
+        des = [self.state_record[i][0].theta for i in range(len(self.state_record))]
+        real = [self.state_record[i][1].theta for i in range(len(self.state_record))]
+        axarr[2].plot(time, des, color = 'r')
+        axarr[2].plot(time, real, color = 'g')
+        des = [self.state_record[i][0].phi for i in range(len(self.state_record))]
+        real = [self.state_record[i][1].phi for i in range(len(self.state_record))]
+        axarr[3].plot(time, des, color = 'r')
+        axarr[3].plot(time, real, color = 'g')
         plt.show()
 
-        f, ax = plt.subplots()
-        x_des = [self.state_record[i][0][0] for i in range len(self.state_record)]
-        y_des = [self.state_record[i][0][1] for i in range len(self.state_record)]
-        x_real = [self.state_record[i][1][0] for i in range len(self.state_record)]
-        y_real = [self.state_record[i][1][1] for i in range len(self.state_record)]
-        ax.plot(x_des, y_des,  color='r')
-        ax.plot(x_real, y_real,  color='b')
-        plt.show()
+        # f, ax = plt.subplots()
+        # x_des = [self.state_record[i][0][0] for i in range(len(self.state_record))]
+        # y_des = [self.state_record[i][0][1] for i in range(len(self.state_record))]
+        # x_real = [self.state_record[i][1][0] for i in range(len(self.state_record))]
+        # y_real = [self.state_record[i][1][1] for i in range(len(self.state_record))]
+        # ax.plot(x_des, y_des,  color='r')
+        # ax.plot(x_real, y_real,  color='b')
+        # plt.show()
 
 
 

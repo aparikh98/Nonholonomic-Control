@@ -52,7 +52,7 @@ class SinusoidPlanner():
             This is a list of timesteps, the command to be sent at that time, and the predicted state at that time
         """
 
-        # This bit hasn't been exhaustively tested, so you might hit a singularity anyways
+        # This bit has print "Predicted Initial State"n't been exhaustively tested, so you might hit a singularity anyways
         max_abs_angle = max(abs(goal_state.theta), abs(start_state.theta))
         min_abs_angle = min(abs(goal_state.theta), abs(start_state.theta))
         if (max_abs_angle > np.pi/2) and (min_abs_angle < np.pi/2):
@@ -102,7 +102,7 @@ class SinusoidPlanner():
         return path
 
     # if we want to stitch paths together we can use t0.
-    def steer_x(self, start_state, goal_state, t0 = 0, dt = 0.01, delta_t = 2):
+    def steer_x(self, start_state, goal_state, t0 = 0, dt = 0.001, delta_t = 2):
         """
         Create a trajectory to move the turtlebot in the x direction
 
@@ -138,7 +138,7 @@ class SinusoidPlanner():
             t = t + dt
         return self.v_path_to_u_path(path, start_state, dt)
 
-    def steer_phi(self, start_state, goal_state, t0 = 0, dt = 0.01, delta_t = 2):
+    def steer_phi(self, start_state, goal_state, t0 = 0, dt = 0.001, delta_t = 2):
         """
         Create a trajectory to move the turtlebot in the phi direction
 
@@ -187,7 +187,7 @@ class SinusoidPlanner():
         return self.v_path_to_u_path(path, start_state, dt)
         
 
-    def steer_alpha(self, start_state, goal_state, t0 = 0, dt = 0.01, delta_t = 2):
+    def steer_alpha(self, start_state, goal_state, t0 = 0, dt = 0.001, delta_t = 2):
         """
         Create a trajectory to move the turtlebot in the alpha direction.
         Remember dot{alpha} = f(phi(t))*u_1(t) = f(frac{a_2}{omega}*sin(omega*t))*a_1*sin(omega*t)
@@ -238,7 +238,7 @@ class SinusoidPlanner():
         return self.v_path_to_u_path(path, start_state, dt)
 
 
-    def steer_y(self, start_state, goal_state, t0 = 0, dt = 0.01, delta_t = 2):
+    def steer_y(self, start_state, goal_state, t0 = 0, dt = 0.001, delta_t = 2):
         """
         Create a trajectory to move the turtlebot in the y direction.
         Remember, dot{y} = g(alpha(t))*v1 = frac{alpha(t)}{sqrt{1-alpha(t)^2}}*a_1*sin(omega*t)
@@ -271,12 +271,12 @@ class SinusoidPlanner():
 
         omega = 2*np.pi / delta_t
 
-        a2 = min(1, self.phi_dist*omega) # default value for a2
+        a2 = min(2, self.phi_dist*omega) # default value for a2
         a1_min = 0.0
-        a1_max = 3.0
+        a1_max = 5.0
         error = 1.0 # i.nitialization
         error_tol = 0.01 # Let the binary search find the approrpiate value with given tolerance
-        print(delta_y)
+        print(delta_y)  
         while abs(error) > error_tol*delta_y:
             a1_mid = (a1_min+a1_max)/2.0
             a1 = a1_mid
