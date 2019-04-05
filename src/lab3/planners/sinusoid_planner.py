@@ -272,25 +272,29 @@ class SinusoidPlanner():
         omega = 2*np.pi / delta_t
 
         a2 = min(1, self.phi_dist*omega) # default value for a2
-        a1_min = 0
-        a1_max = 1000
-        error = 1 # initialization
+        a1_min = 0.0
+        a1_max = 3.0
+        error = 1.0 # i.nitialization
         error_tol = 0.01 # Let the binary search find the approrpiate value with given tolerance
+        print(delta_y)
         while abs(error) > error_tol*delta_y:
-            a1_mid = (a1_min+a1_max)/2
+            a1_mid = (a1_min+a1_max)/2.0
             a1 = a1_mid
             f = lambda phi: (1/self.l)*np.tan(phi) # This is from the car model
             g = lambda alpha: alpha/np.sqrt(1-alpha*alpha) # This is also from the car model
 
-            phi_fn = lambda tau: (a2/(2*omega))*np.sin(2*omega*tau) + start_state_v[1]
+            phi_fn = lambda tau: (a2/(2*omega))*np.sin(2*omega*tau)
             integrand1 = lambda tau: f(phi_fn(tau))*a1*np.sin(omega*tau) # The integrand to find beta
-            integrand2 = lambda t: g(quad(integrand1,0,t)[0])*np.sin(omega*t) 
+            integrand2 = lambda t: g(quad(integrand1, 0, t)[0])*np.sin(omega*t) 
             beta1 = (omega/np.pi) * quad(integrand2, 0, 2*np.pi/omega)[0]
-            error = delta_y-np.pi*a1*beta1
+            error = delta_y-np.pi*a1*beta1/omega
+            print(error,a1_mid)
             if error >= 0:
                 a1_min = a1_mid # we should increase a1
             else:
                 a1_max = a1_mid
+            if a1_max - a1_min <= 0.0001:
+                break
 
         print(a1,a2,beta1)
 

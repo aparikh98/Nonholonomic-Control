@@ -111,6 +111,7 @@ if __name__ == '__main__':
     print "Final State"
     print ex.state
 
+
     
     #reset turtle in terminal
     
