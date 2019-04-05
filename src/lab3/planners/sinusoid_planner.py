@@ -260,7 +260,44 @@ class SinusoidPlanner():
         """
 
         # ************* IMPLEMENT THIS
-        return []
+        # return []
+                start_state_v = self.state2v(start_state)
+        goal_state_v = self.state2v(goal_state)
+        delta_y = goal_state_v[3] - start_state_v[3]
+
+        omega = 2*np.pi / delta_t
+
+        a2 = min(1, self.phi_dist*omega) # default value for a2
+        a1_min = 0
+        a1_max = 1000
+        error = 1 # initialization
+        error_tol = 0.01 # Let the binary search find the approrpiate value with given tolerance
+        while abs(error) > error_tol*delta_y:
+            a1_mid = (a1_min+a1_max)/2
+            a1 = a1_mid
+            f = lambda phi: (1/self.l)*np.tan(phi) # This is from the car model
+            g = lambda alpha: alpha/sqrt(1-alpha*alpha) # This is also from the car model
+
+            phi_fn = lambda tau: (a2/(2*omega))*np.sin(2*omega*tau) + start_state_v[1]
+            integrand1 = lambda tau: f(phi_fn(tau))*a1*np.sin(omega*tau) # The integrand to find beta
+            integrand2 = lambda t: g(quad(integrand1,0,t))*sin(omega*t) 
+            beta1 = (omega/np.pi) * quad(integrand2, 0, 2*np.pi/omega)[0]
+            error = delta_y-np.pi*a1*beta1
+            if error >= 0:
+                a1_min = a1_mid # we should increase a1
+            else:
+                a1_max = a1_mid
+
+        print(a1,a2,beta1)
+
+        v1 = lambda t: a1*np.sin(omega*(t))
+        v2 = lambda t: a2*np.cos(2*omega*(t))
+
+        path, t = [], t0
+        while t < t0 + delta_t:
+            path.append([t, v1(t-t0), v2(t-t0)])
+            t = t + dt
+        return self.v_path_to_u_path(path, start_state, dt)
 
     def state2v(self, state):
         """
