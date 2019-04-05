@@ -56,10 +56,10 @@ class SinusoidPlanner():
         max_abs_angle = max(abs(goal_state.theta), abs(start_state.theta))
         min_abs_angle = min(abs(goal_state.theta), abs(start_state.theta))
         if (max_abs_angle > np.pi/2) and (min_abs_angle < np.pi/2):
-            raise ValueError("You'll cause a singularity here. You should add something to this function to fix it")
+            raise ValueError("You'll cause a singularity here. You should add something to this function to fix it", max_abs_angle, min_abs_angle)
 
         if abs(start_state.phi) > self.max_phi or abs(goal_state.phi) > self.max_phi:
-            raise ValueError("Either your start state or goal state exceeds steering angle bounds")
+            raise ValueError("Either your start state or goal state exceeds steering angle bounds", goal_state.phi)
 
         # We can only change phi up to some threshold
         self.phi_dist = min(
@@ -172,6 +172,10 @@ class SinusoidPlanner():
         # ************* IMPLEMENT THIS
         # return []
 
+        start_state_v = self.state2v(start_state)
+        goal_state_v = self.state2v(goal_state)
+        delta_phi = goal_state_v[1] - start_state_v[1]
+
         v1 = 0
         v2 = delta_phi/delta_t
         # we can have phi only changed with v1 = 0 and v2 = delta_phi/delta_t (linear function)  
@@ -261,7 +265,7 @@ class SinusoidPlanner():
 
         # ************* IMPLEMENT THIS
         # return []
-                start_state_v = self.state2v(start_state)
+        start_state_v = self.state2v(start_state)
         goal_state_v = self.state2v(goal_state)
         delta_y = goal_state_v[3] - start_state_v[3]
 
@@ -276,11 +280,11 @@ class SinusoidPlanner():
             a1_mid = (a1_min+a1_max)/2
             a1 = a1_mid
             f = lambda phi: (1/self.l)*np.tan(phi) # This is from the car model
-            g = lambda alpha: alpha/sqrt(1-alpha*alpha) # This is also from the car model
+            g = lambda alpha: alpha/np.sqrt(1-alpha*alpha) # This is also from the car model
 
             phi_fn = lambda tau: (a2/(2*omega))*np.sin(2*omega*tau) + start_state_v[1]
             integrand1 = lambda tau: f(phi_fn(tau))*a1*np.sin(omega*tau) # The integrand to find beta
-            integrand2 = lambda t: g(quad(integrand1,0,t))*sin(omega*t) 
+            integrand2 = lambda t: g(quad(integrand1,0,t)[0])*np.sin(omega*t) 
             beta1 = (omega/np.pi) * quad(integrand2, 0, 2*np.pi/omega)[0]
             error = delta_y-np.pi*a1*beta1
             if error >= 0:
