@@ -15,7 +15,7 @@ class Sinusoid():
     def __init__(self):
         self.pub = rospy.Publisher('/bicycle/cmd_vel', BicycleCommandMsg, queue_size=10)
         self.sub = rospy.Subscriber('/bicycle/state', BicycleStateMsg, self.subscribe )
-        self.rate = rospy.Rate(100)
+        self.rate = rospy.Rate(200)
         self.state = BicycleStateMsg()
 
     def run(self, a1, a2, w1, w2):

@@ -39,6 +39,9 @@ class Exectutor(object):
         Parameters
         ----------
         plan : :obj:`list` of (time, BicycleCommandMsg, BicycleStateMsg)
+        self.state -> x(t)
+        state -> x0(t)
+        cmd -> u0(t)
         """
         if len(plan) == 0:
             return
@@ -137,7 +140,7 @@ if __name__ == '__main__':
 
     p = SinusoidPlanner(0.3, 0.3, 2, 3)
     goalState = BicycleStateMsg(args.x, args.y, args.theta, args.phi)
-    plan = p.plan_to_pose(ex.state, goalState, 0.01, 2)
+    plan = p.plan_to_pose(ex.state, goalState, 0.01, 6)
 
     print "Predicted Initial State"
     print plan[0][2]
