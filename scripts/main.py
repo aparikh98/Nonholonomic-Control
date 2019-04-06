@@ -96,14 +96,14 @@ class Exectutor(object):
         axarr[3].plot(time, real, color = 'g')
         plt.show()
 
-        # f, ax = plt.subplots()
-        # x_des = [self.state_record[i][0][0] for i in range(len(self.state_record))]
-        # y_des = [self.state_record[i][0][1] for i in range(len(self.state_record))]
-        # x_real = [self.state_record[i][1][0] for i in range(len(self.state_record))]
-        # y_real = [self.state_record[i][1][1] for i in range(len(self.state_record))]
-        # ax.plot(x_des, y_des,  color='r')
-        # ax.plot(x_real, y_real,  color='b')
-        # plt.show()
+        f, ax = plt.subplots()
+        x_des = [self.state_record[i][0].x for i in range(len(self.state_record))]
+        y_des = [self.state_record[i][0].y for i in range(len(self.state_record))]
+        x_real = [self.state_record[i][1].x for i in range(len(self.state_record))]
+        y_real = [self.state_record[i][1].y for i in range(len(self.state_record))]
+        ax.plot(x_des, y_des,  color='r')
+        ax.plot(x_real, y_real,  color='b')
+        plt.show()
 
 
 

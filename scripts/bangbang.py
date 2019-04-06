@@ -174,25 +174,35 @@ class BangBang(object):
 
     def plot(self):
         #this plotting is pretty bad since it assumes time steps are equal, but ehh
-        
-        # f, axarr = plt.subplots(4, sharex=True)
-        # time = [i for i in range len(self.state_record)]
-        # for idx in range(4):
-        #     des = [((double) self.goal[idx] )/len(self.state_record) * i  for i in range len(self.state_record)]
-        #     real = [self.state_record[i][idx] for i in range len(self.state_record)]
-        #     axarr[idx].scatter(time, des)
-        #     axarr[idx].scatter(time, real)
-        # plt.show()
 
-        # f, ax = plt.subplots()
-        # x_des = [((double) self.goal[0] )/len(self.state_record) * i  for i in range len(self.state_record)]
-        # y_des = [((double) self.goal[1] )/len(self.state_record) * i  for i in range len(self.state_record)]
-        # x_real = [self.state_record[i][0] for i in range len(self.state_record)]
-        # y_real = [self.state_record[i][1] for i in range len(self.state_record)]
-        # ax.plot(x_des, y_des,  color='r')
-        # ax.plot(x_real, y_real,  color='b')
-        # plt.show()
-        pass
+        f, axarr = plt.subplots(4, sharex=True)
+        time = [i for i in range(len(self.state_record))]
+        des = [((double) self.goal[0] )/len(self.state_record) * i  for i in range(len(self.state_record))]
+        real = [self.state_record[i][1].x for i in range(len(self.state_record))]
+        axarr[0].plot(time, des, color = 'r')
+        axarr[0].plot(time, real, color = 'g')
+        des = [((double) self.goal[0] )/len(self.state_record) * i  for i in range(len(self.state_record))]
+        real = [self.state_record[i][1].y for i in range(len(self.state_record))]
+        axarr[1].plot(time, des, color = 'r')
+        axarr[1].plot(time, real, color = 'g')
+        des = [((double) self.goal[0] )/len(self.state_record) * i  for i in range(len(self.state_record))]
+        real = [self.state_record[i][1].theta for i in range(len(self.state_record))]
+        axarr[2].plot(time, des, color = 'r')
+        axarr[2].plot(time, real, color = 'g')
+        des = [((double) self.goal[0] )/len(self.state_record) * i  for i in range(len(self.state_record))]
+        real = [self.state_record[i][1].phi for i in range(len(self.state_record))]
+        axarr[3].plot(time, des, color = 'r')
+        axarr[3].plot(time, real, color = 'g')
+        plt.show()
+
+        f, ax = plt.subplots()
+        x_des = [((double) self.goal[0] )/len(self.state_record) * i  for i in range(len(self.state_record))]
+        y_des = [self.state_record[i][0].y for i in range(len(self.state_record))]
+        x_real = [((double) self.goal[1] )/len(self.state_record) * i  for i in range(len(self.state_record))]
+        y_real = [self.state_record[i][1].y for i in range(len(self.state_record))]
+        ax.plot(x_des, y_des,  color='r')
+        ax.plot(x_real, y_real,  color='b')
+        plt.show()
 
 if __name__ == '__main__':
     rospy.init_node('bangbang', anonymous=False)
@@ -201,7 +211,7 @@ if __name__ == '__main__':
     # b.translate_y_and_x()
     # b.translate_x(1)
     # b.translate_y(1)
-    b.translate_y(0.5)
+    # b.translate_y(0.5)
     #while (the distance is quite large)
         # update d and magnitude according to the position error of turtle
         # execute the strafe movement
