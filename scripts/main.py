@@ -12,7 +12,7 @@ import tf
 from std_srvs.srv import Empty as EmptySrv
 import rospy
 import matplotlib.pyplot as plt
-
+import time
 from scipy.linalg import expm
 from scipy.integrate import quad
 
@@ -45,54 +45,47 @@ class Exectutor(object):
         
         # constant
         alpha = 0.1
-        delta = 0.001
+        delta = 0.01
         gamma = 1 
+
+        cmd_list = []
+        state_list = []
         for (t, cmd, state) in plan:
-            #gain should be an np.array
-            # precomputation
-            if abs(state.x) <= 0.01:
-                state.x += 0.01
-            if abs(state.y) <= 0.01:  
-                state.y += 0.015 
-            if abs(state.theta) <= 0.005: 
-                state.theta += 0.005
-            if abs(state.phi) <= 0.005:  
-                state.phi += 0.005  
-            if abs(cmd.linear_velocity) <= 0.01:
-                cmd.linear_velocity += 0.012
-            if abs(cmd.steering_rate) <= 0.01: 
-                cmd.steering_rate += 0.0008  
+            cmd_list.append([cmd.linear_velocity, cmd.steering_rate])
+            state_list.append([state.x, state.y, state.theta, state.phi])
 
-            print(state)
-            A = np.matrix([[0, 0, -np.sin(state.theta)*cmd.linear_velocity,0 ],
-                 [0, 0, np.cos(state.theta)*cmd.linear_velocity, 0],
-                 [0, 0, 0, 1/l *( 1+ np.tan(state.theta)**2)*cmd.linear_velocity],
-                 [0, 0, 0, 0]])
+        for (t, cmd, state) in plan:
 
-            B = np.matrix([[np.cos(state.theta),1],
-                [np.sin(state.theta),1],
-                [1/l*np.tan(state.theta),1],
+            time_horizon = 100
+            H = np.zeros((4,4))
+            t_start = t
+            for index in range(time_horizon):
+                index_ss = (int)(index+ t/delta)
+                A = np.matrix([[0, 0, -np.sin(state_list[index_ss][2])*cmd_list[index_ss][0],0 ],
+                [0, 0, np.cos(state_list[index_ss][2])*cmd_list[index_ss][0], 0],
+                [0, 0, 0, 1/l *( 1 + np.tan(state_list[index_ss][2])**2)*cmd_list[index_ss][0]],
+                [0, 0, 0, 0]])
+
+                B = np.matrix([[np.cos(state_list[index_ss][2]),0],
+                [np.sin(state_list[index_ss][2]),0],
+                [1/l*np.tan(state_list[index_ss][2]),0],
                 [0,1]])
 
-            t_start = t*delta
-
-            func1 = lambda tau : np.matmul(np.transpose(B),np.transpose(expm(-A*tau)))
-            func2 = lambda tau : np.matmul(B,func1(tau))
-            func3 = lambda tau : np.matmul(expm(-A*tau),func2(tau))
-            func4 = lambda tau : np.exp(6*alpha*(tau-t_start) * func3(tau))
-            
-            H = np.zeros((4,4))
-            size = 200 # simpson method
-            for ind in range(size):
-                integral_delta_t = delta/size
-                temp = func4(t_start + ind*integral_delta_t)
-                for i in range(4):
-                    for j in range(4):
-                        H[i,j] += temp[i,j] * integral_delta_t
-
-            print(t)
-            print(H)    
-
+                            
+                func1 = lambda tau : np.matmul(np.transpose(B),np.transpose(expm(-A*tau)))
+                func2 = lambda tau : np.matmul(B,func1(tau))
+                func3 = lambda tau : np.matmul(expm(-A*tau),func2(tau))
+                func4 = lambda tau : np.exp(6*alpha*(tau-t_start) * func3(tau))
+                
+                size = 20 # simpson method
+                for ind in range(size):
+                    integral_delta_t = delta/size
+                    temp = func4(t_start + ind*integral_delta_t)
+                    for i in range(4):
+                        for j in range(4):
+                            H[i,j] += temp[i,j] * integral_delta_t
+                time.sleep(0.5)
+                print(H)
             P = np.linalg.inv(H)
 
             gain = gamma * np.matmul(np.transpose(B),P) 
@@ -100,6 +93,58 @@ class Exectutor(object):
             gains.append(gain)
 
         return gains
+
+
+            # precomputation
+            # if abs(state.x) <= 0.01:
+            #     state.x += 0.01
+            # if abs(state.y) <= 0.01:  
+            #     state.y += 0.015 
+            # if abs(state.theta) <= 0.005: 
+            #     state.theta += 0.005
+            # if abs(state.phi) <= 0.005:  
+            #     state.phi += 0.005  
+            # if abs(cmd.linear_velocity) <= 0.01:
+            #     cmd.linear_velocity += 0.012
+            # if abs(cmd.steering_rate) <= 0.01: 
+            #     cmd.steering_rate += 0.0008  
+
+            # print(state)
+            # A = np.matrix([[0, 0, -np.sin(state.theta)*cmd.linear_velocity,0 ],
+            #      [0, 0, np.cos(state.theta)*cmd.linear_velocity, 0],
+            #      [0, 0, 0, 1/l *( 1+ np.tan(state.theta)**2)*cmd.linear_velocity],
+            #      [0, 0, 0, 0]])
+
+            # B = np.matrix([[np.cos(state.theta),1],
+            #     [np.sin(state.theta),1],
+            #     [1/l*np.tan(state.theta),1],
+            #     [0,1]])
+
+            # t_start = t*delta
+
+            # func1 = lambda tau : np.matmul(np.transpose(B),np.transpose(expm(-A*tau)))
+            # func2 = lambda tau : np.matmul(B,func1(tau))
+            # func3 = lambda tau : np.matmul(expm(-A*tau),func2(tau))
+            # func4 = lambda tau : np.exp(6*alpha*(tau-t_start) * func3(tau))
+            
+            # H = np.zeros((4,4))
+            # size = 200 # simpson method
+            # for ind in range(size):
+            #     integral_delta_t = delta/size
+            #     temp = func4(t_start + ind*integral_delta_t)
+            #     for i in range(4):
+            #         for j in range(4):
+            #             H[i,j] += temp[i,j] * integral_delta_t
+
+            # print(t)
+            # print(H)    
+
+            # P = np.linalg.inv(H)
+
+            # gain = gamma * np.matmul(np.transpose(B),P) 
+
+            # gains.append(gain)
+
 
     def executeGain(self, plan, gains):
         for i in range(len(plan)):
@@ -219,17 +264,19 @@ if __name__ == '__main__':
 
     p = SinusoidPlanner(l, 0.3, 2, 3)
     goalState = BicycleStateMsg(args.x, args.y, args.theta, args.phi)
-    plan = p.plan_to_pose(ex.state, goalState, 0.01, 6)
-
+    if (args.theta > 1):
+        plan = p.plan_to_pose3(ex.state, goalState, 0.01, 6)
+    else:
+        plan = p.plan_to_pose(ex.state, goalState, 0.01, 6)    
     print "Predicted Initial State"
     print plan[0][2]
     print "Predicted Final State"
     print plan[-1][2]
 
-    gains = ex.calculateGain(plan)
-    ex.executeGain(plan, gains)
+    # gains = ex.calculateGain(plan)
+    # ex.executeGain(plan, gains)
 
-    #ex.execute(plan)
+    ex.execute(plan)
     print "Final State"
     print ex.state
     ex.plot()
