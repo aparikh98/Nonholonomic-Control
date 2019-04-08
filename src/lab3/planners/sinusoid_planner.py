@@ -270,7 +270,6 @@ class SinusoidPlanner():
         delta_y = goal_state_v[3] - start_state_v[3]
 
         omega = 2*np.pi / delta_t
-
         a2 = min(2, self.phi_dist*omega) # default value for a2
         a1_min = 0.0
         a1_max = 5.0

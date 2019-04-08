@@ -221,7 +221,3 @@ if __name__ == '__main__':
             #/converter/reset
 
 
-# 1: bang bang x(1)
-# 2: bang bang y(0.5)
-# 3: bang bang y(1)
-# 4: bang bang theta(pi)

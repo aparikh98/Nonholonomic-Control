@@ -32,6 +32,28 @@ class Exectutor(object):
         rospy.on_shutdown(self.shutdown)
         self.state_record = []
 
+    def calculateGain(self, plan):
+        gains = []
+        # plan[i] = 
+        #  x0(t) state (state.x, state.y, state.theta, state.phi)
+        #  u0(t) cmd  (cmd.linear_velocity, cmd.steering_rate)
+        for (t, cmd, state) in plan:
+            #gain should be an np.array
+            
+            gains.append(gain)
+
+        return gains
+
+    def executeGain(self, plan, gains):
+        for i in range(len(plan)):
+            newcmd = plan[i][1] - np.matmul(gains[i], (self.state - plan[i][2]))
+            self.cmd(newcmd)
+            self.rate.sleep()
+            self.state_record.append((state,self.state))
+            if rospy.is_shutdown():
+                break
+        self.cmd(BicycleCommandMsg())
+
     def execute(self, plan):
         """
         Executes a plan made by the planner
@@ -147,6 +169,9 @@ if __name__ == '__main__':
     print "Predicted Final State"
     print plan[-1][2]
 
+    gains = ex.calculateGain(plan)
+    ex.executeGain(plan, gains)
+
     ex.execute(plan)
     print "Final State"
     print ex.state
@@ -159,3 +184,12 @@ if __name__ == '__main__':
 
     #we should make our own plotting code
     # They want us to share plotting code
+
+#videos:
+# 1: bang bang x(1)
+# 2: bang bang y(0.5)
+# 3: bang bang y(1)
+# 4: bang bang theta(pi)
+
+
+# 5: sin x(1)
