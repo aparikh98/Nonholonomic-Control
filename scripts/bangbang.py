@@ -50,12 +50,29 @@ class BangBang(object):
         self.cmd(0,0)
         self.rate.sleep()
 
+    def move_forward(self, dist):
+        initial_pos = np.array([self.state[0], self.state[1]])
+        self.goal = np.array([self.state[0] + np.cos(self.state[2]) * dist, self.state[1] + np.sin(self.state[2]) * dist, self.state[2], self.state[3]])
+        current_pos = np.array([self.state[0], self.state[1]])
+        distance = np.linalg.norm(current_pos-initial_pos)
+        while (distance < dist ):
+            self.cmd(dist/2, -1 * self.state[3])
+            if rospy.is_shutdown():
+                self.cmd(0,0)
+                break
+            self.rate.sleep()
+            current_pos = np.array([self.state[0], self.state[1]])
+            distance = np.linalg.norm(current_pos-initial_pos)
+        self.cmd(0,0)
+        self.rate.sleep()
+
+
     def translate_theta(self, angle):
         goal = np.array([0.0,0.0,angle,0.0])
         self.goal = goal
         distance = goal - self.state
         print(distance)
-        while ((distance[2]) > 0.1):
+        while ((distance[2]) > 0.1 and distance[2] < 6):
 
 
             self.cmd( 0.3, 1)
@@ -71,29 +88,29 @@ class BangBang(object):
         self.cmd(0,0)
         self.rate.sleep()
 
-    def rotate_theta2(self, angle):
-        goal = np.array([0.0,0.0,angle,0.0])
-        self.goal = goal
-        distance = goal - self.state
-        #sign = distance > 0 ? -1 : 1
-        while (abs(distance[2]) > 0.05):
-            if distance[2] > 0:
-                sign = 1
-            else:
-                sign = -1
+    # def rotate_theta2(self, angle):
+    #     goal = np.array([0.0,0.0,angle,0.0])
+    #     self.goal = goal
+    #     distance = goal - self.state
+    #     #sign = distance > 0 ? -1 : 1
+    #     while (abs(distance[2]) > 0.05):
+    #         if distance[2] > 0:
+    #             sign = 1
+    #         else:
+    #             sign = -1
 
-            self.cmd(0.3 ,sign * 2)
-            if rospy.is_shutdown():
-                print("SHUT DOWN")
-                self.cmd(0,0)
-                break
-            self.rate.sleep()
-            distance = goal - self.state
-            print(self.state, distance)
-        self.rate.sleep()
-        self.rate.sleep()
-        self.cmd(0,0)
-        self.rate.sleep()
+    #         self.cmd(0.3 ,sign * 2)
+    #         if rospy.is_shutdown():
+    #             print("SHUT DOWN")
+    #             self.cmd(0,0)
+    #             break
+    #         self.rate.sleep()
+    #         distance = goal - self.state
+    #         print(self.state, distance)
+    #     self.rate.sleep()
+    #     self.rate.sleep()
+    #     self.cmd(0,0)
+    #     self.rate.sleep()
 
     def translate_y(self, dist):
         goal = np.array([0.0,dist,0.0,0.0])
@@ -123,15 +140,12 @@ class BangBang(object):
         self.rate.sleep()
 
     def translate_y_and_x(self):
-        self.goal = np.array([2.0,2.0,0.0, 0.0])
-        self.translate_x(0.5)
-        self.rotate_theta2(np.pi)
-
-        self.rotate_theta2(0)
-        #self.translate_theta(0)
-        #print('translate theta')
-
-        self.translate_x(1)
+        self.goal = np.array([0.5,0.5,0.0, 0.0])
+        self.move_forward(0.2)
+        self.translate_theta(np.pi/2)
+        self.move_forward(0.6)
+        self.translate_theta(np.pi*2)
+        self.move_forward(0.2)
 
         self.cmd(0,0)
         print(self.state)
